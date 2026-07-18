@@ -20,6 +20,8 @@ keep count or watch a clock.
 - Smooth circle animation updated every 100 milliseconds.
 - Full-brightness circle while inhaling and the same color at 55% brightness
   while exhaling.
+- Subtle glow around the circle, rendered as a soft gradient on full-color
+  displays and a sparse halo on eight-color displays.
 - Current phase (`INHALE` or `EXHALE`) shown at the top of the screen.
 - Remaining phase time shown inside the circle in tenths of a second.
 - Free sessions or automatic completion after 5, 10, 15, or 20 minutes.
@@ -35,9 +37,11 @@ keep count or watch a clock.
 - Best-effort backlight requests during a running session, respecting platform
   limits and the watch's configured brightness level.
 - Heart-rate sensor enabled only while the exercise is running.
-- Each completed session saved as a localized FIT activity and synced by Garmin
+- Explicit **Save** or **Discard** choice whenever a session is ended normally.
+- Saved sessions recorded as localized FIT activities and synced by Garmin
   Connect.
-- Automatic save when leaving the app during an active session.
+- Safety save if the operating system closes the app unexpectedly during a
+  session or while the final choice is open.
 - English and Italian interface selected automatically from the watch language.
 - High-contrast countdown text selected automatically for the chosen circle
   color.
@@ -55,11 +59,12 @@ keep count or watch a clock.
    - breathe in while it grows at full brightness;
    - breathe out while it shrinks in a darker shade;
    - follow the configured vibration cues without needing to watch the display.
-6. Press **START/ENTER** again to stop and save the session. A timed session
-   stops and saves automatically when it reaches its configured duration.
+6. Press **START/ENTER** again to stop the session, then select **Save** or
+   **Discard**. A timed session stops automatically and opens the same choice
+   when it reaches its configured duration.
 
-Pressing **BACK** during a session also stops and saves it before leaving the
-app.
+Pressing **BACK** during a session also stops it and opens the Save/Discard
+menu. The menu must be answered explicitly before leaving the session.
 
 ## Screen information
 
@@ -69,8 +74,9 @@ and total elapsed exercise time. Timed sessions show elapsed and target time as
 inhale or exhale phase.
 
 The circle reaches its maximum size at the end of inhalation and its minimum
-size at the end of exhalation. Its brightness changes immediately at each phase
-boundary, and a new cycle starts automatically.
+size at the end of exhalation. Its solid radius is unchanged by the glow. Its
+brightness changes immediately at each phase boundary, and a new cycle starts
+automatically.
 
 ## Settings
 
@@ -109,9 +115,10 @@ the fallback for other system languages.
 ## Garmin Connect activity recording
 
 Starting the breathing exercise also starts a generic FIT recording. Stopping
-the exercise saves the recording under the localized name `Breathing` or
-`Respiro`. After the next watch sync, Garmin Connect should show it as a generic
-or **Other** activity with its duration and heart-rate data when available.
+the exercise asks whether to save or discard it. A saved recording uses the
+localized name `Breathing` or `Respiro`; a discarded recording is removed.
+After the next watch sync, Garmin Connect should show saved sessions as generic
+or **Other** activities with duration and heart-rate data when available.
 
 The app requests only these Connect IQ permissions:
 

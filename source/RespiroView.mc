@@ -28,11 +28,18 @@ class RespiroView extends Ui.View {
     private const MIN_RADIUS_REFERENCE = 24;
     private const MAX_RADIUS_REFERENCE = 82;
     private const READY_RADIUS_REFERENCE = 48;
+    private const GLOW_OUTER_REFERENCE = 8;
+    private const GLOW_MIDDLE_REFERENCE = 5;
+    private const GLOW_INNER_REFERENCE = 2;
+    private const GLOW_OUTER_BRIGHTNESS_PERCENT = 22;
+    private const GLOW_MIDDLE_BRIGHTNESS_PERCENT = 38;
+    private const GLOW_INNER_BRIGHTNESS_PERCENT = 62;
 
     private var _frameTimer;
     private var _recordingSession;
     private var _recordingStarted = false;
     private var _isRunning = false;
+    private var _isAwaitingSave = false;
     private var _lastPhaseIsInhaling = true;
     private var _startedAtMs = 0;
     private var _lastBacklightAtMs = 0;
@@ -70,9 +77,22 @@ class RespiroView extends Ui.View {
         if (_isRunning) {
             _frameTimer.stop();
             _isRunning = false;
-            stopRecordingAndSave();
-        } else {
+            stopRecordingForDecision();
+            finalizeRecording(true);
+        } else if (!_isAwaitingSave) {
             disableSessionSensors();
+        }
+    }
+
+    function handleAppStop() {
+        if (_isRunning) {
+            _frameTimer.stop();
+            _isRunning = false;
+            stopRecordingForDecision();
+            finalizeRecording(true);
+        } else if (_isAwaitingSave) {
+            _isAwaitingSave = false;
+            finalizeRecording(true);
         }
     }
 
@@ -159,7 +179,39 @@ class RespiroView extends Ui.View {
 
         _frameTimer.stop();
         _isRunning = false;
-        stopRecordingAndSave();
+        _isAwaitingSave = true;
+        stopRecordingForDecision();
+
+        var menu = new Ui.Menu2({
+            :title => Rez.Strings.EndSessionTitle,
+            :focus => 0
+        });
+        menu.addItem(new Ui.MenuItem(
+            Rez.Strings.SaveSession,
+            null,
+            1,
+            null
+        ));
+        menu.addItem(new Ui.MenuItem(
+            Rez.Strings.DiscardSession,
+            null,
+            0,
+            null
+        ));
+        Ui.pushView(
+            menu,
+            new RespiroSaveMenuDelegate(self),
+            Ui.SLIDE_UP
+        );
+    }
+
+    function resolveSaveDecision(shouldSave) {
+        if (!_isAwaitingSave) {
+            return;
+        }
+
+        _isAwaitingSave = false;
+        finalizeRecording(shouldSave);
         Ui.requestUpdate();
     }
 
@@ -218,8 +270,7 @@ class RespiroView extends Ui.View {
             Gfx.COLOR_LT_GRAY
         );
 
-        dc.setColor(_circleColor, Gfx.COLOR_BLACK);
-        dc.fillCircle(centerX, centerY, readyRadius);
+        drawGlowingCircle(dc, centerX, centerY, readyRadius, _circleColor);
         drawCenteredText(
             dc,
             centerY,
@@ -298,8 +349,7 @@ class RespiroView extends Ui.View {
             Gfx.COLOR_WHITE
         );
 
-        dc.setColor(phaseColor, Gfx.COLOR_BLACK);
-        dc.fillCircle(centerX, centerY, radius);
+        drawGlowingCircle(dc, centerX, centerY, radius, phaseColor);
         drawCenteredText(
             dc,
             centerY,
@@ -341,6 +391,55 @@ class RespiroView extends Ui.View {
         return dc.getWidth() <= 208 && dc.getHeight() <= 208
             ? Gfx.COLOR_LT_GRAY
             : Gfx.COLOR_DK_GRAY;
+    }
+
+    private function drawGlowingCircle(dc, centerX, centerY, radius, color) {
+        if (dc.getWidth() <= 208 && dc.getHeight() <= 208) {
+            // Eight-color displays cannot represent a smooth dark gradient.
+            // A sparse ring keeps the halo visible without enlarging the
+            // solid breathing circle.
+            dc.setColor(color, Gfx.COLOR_BLACK);
+            dc.drawCircle(
+                centerX,
+                centerY,
+                radius + scaleToDisplay(dc, GLOW_MIDDLE_REFERENCE)
+            );
+            dc.fillCircle(centerX, centerY, radius);
+            return;
+        }
+
+        dc.setColor(
+            applyBrightness(color, GLOW_OUTER_BRIGHTNESS_PERCENT),
+            Gfx.COLOR_BLACK
+        );
+        dc.fillCircle(
+            centerX,
+            centerY,
+            radius + scaleToDisplay(dc, GLOW_OUTER_REFERENCE)
+        );
+
+        dc.setColor(
+            applyBrightness(color, GLOW_MIDDLE_BRIGHTNESS_PERCENT),
+            Gfx.COLOR_BLACK
+        );
+        dc.fillCircle(
+            centerX,
+            centerY,
+            radius + scaleToDisplay(dc, GLOW_MIDDLE_REFERENCE)
+        );
+
+        dc.setColor(
+            applyBrightness(color, GLOW_INNER_BRIGHTNESS_PERCENT),
+            Gfx.COLOR_BLACK
+        );
+        dc.fillCircle(
+            centerX,
+            centerY,
+            radius + scaleToDisplay(dc, GLOW_INNER_REFERENCE)
+        );
+
+        dc.setColor(color, Gfx.COLOR_BLACK);
+        dc.fillCircle(centerX, centerY, radius);
     }
 
     private function requestBacklight() {
@@ -496,12 +595,13 @@ class RespiroView extends Ui.View {
             return _circleColor;
         }
 
-        var red = ((_circleColor >> 16) & 0xff)
-            * EXHALE_BRIGHTNESS_PERCENT / 100;
-        var green = ((_circleColor >> 8) & 0xff)
-            * EXHALE_BRIGHTNESS_PERCENT / 100;
-        var blue = (_circleColor & 0xff)
-            * EXHALE_BRIGHTNESS_PERCENT / 100;
+        return applyBrightness(_circleColor, EXHALE_BRIGHTNESS_PERCENT);
+    }
+
+    private function applyBrightness(color, brightnessPercent) {
+        var red = ((color >> 16) & 0xff) * brightnessPercent / 100;
+        var green = ((color >> 8) & 0xff) * brightnessPercent / 100;
+        var blue = (color & 0xff) * brightnessPercent / 100;
         return (red << 16) | (green << 8) | blue;
     }
 
@@ -515,13 +615,23 @@ class RespiroView extends Ui.View {
         _recordingStarted = _recordingSession.start();
     }
 
-    private function stopRecordingAndSave() {
+    private function stopRecordingForDecision() {
+        if (_recordingSession != null) {
+            if (_recordingSession.isRecording()) {
+                _recordingSession.stop();
+            }
+        }
+
+        disableSessionSensors();
+    }
+
+    private function finalizeRecording(shouldSave) {
         if (_recordingSession != null) {
             if (_recordingSession.isRecording()) {
                 _recordingSession.stop();
             }
 
-            if (_recordingStarted) {
+            if (shouldSave && _recordingStarted) {
                 _recordingSession.save();
             } else {
                 _recordingSession.discard();

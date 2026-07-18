@@ -19,4 +19,10 @@ class RespiroApp extends App.AppBase {
             Ui.requestUpdate();
         }
     }
+
+    function onStop(state) {
+        if (_view != null) {
+            _view.handleAppStop();
+        }
+    }
 }

@@ -39,4 +39,7 @@
     <string id="SessionUnlimitedShort">LIBERA</string>
     <string id="MinutesShort">MIN</string>
     <string id="SessionMenuHint">DOWN: DURATA</string>
+    <string id="EndSessionTitle">FINE SESSIONE</string>
+    <string id="SaveSession">Salva</string>
+    <string id="DiscardSession">Scarta</string>
 </strings>

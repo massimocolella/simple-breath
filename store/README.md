@@ -11,6 +11,7 @@ Connect IQ Store submission.
 - `assets/*.svg`: editable vector sources for the Store artwork.
 - `screenshots/fr265-ready.png`: ready screen on a 416×416 AMOLED target.
 - `screenshots/fr265-running.png`: running screen on a 416×416 AMOLED target.
+- `screenshots/fr265-save-menu.png`: explicit Save/Discard menu on AMOLED.
 - `screenshots/fr55-ready.png`: compact-display QA capture at 208×208.
 - `screenshots/fr55-running.png`: compact running-screen QA capture at 208×208.
 

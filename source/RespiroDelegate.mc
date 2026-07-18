@@ -80,7 +80,11 @@ class RespiroDelegate extends Ui.BehaviorDelegate {
     }
 
     function onBack() {
-        _view.stop();
+        if (_view.isRunning()) {
+            _view.stop();
+            return true;
+        }
+
         return false;
     }
 }
