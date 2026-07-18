@@ -24,8 +24,10 @@ class RespiroView extends Ui.View {
     private const SOUND_OFF = 0;
     private const SOUND_EVERY_CYCLE = 1;
     private const SOUND_EVERY_PHASE = 2;
-    private const MIN_RADIUS = 24;
-    private const MAX_RADIUS = 82;
+    private const REFERENCE_DISPLAY_SIZE = 240;
+    private const MIN_RADIUS_REFERENCE = 24;
+    private const MAX_RADIUS_REFERENCE = 82;
+    private const READY_RADIUS_REFERENCE = 48;
 
     private var _frameTimer;
     private var _recordingSession;
@@ -34,6 +36,7 @@ class RespiroView extends Ui.View {
     private var _lastPhaseIsInhaling = true;
     private var _startedAtMs = 0;
     private var _lastBacklightAtMs = 0;
+    private var _backlightAvailable = true;
     private var _inhaleMs = DEFAULT_PHASE_MS;
     private var _exhaleMs = DEFAULT_PHASE_MS;
     private var _sessionDurationMs = 0;
@@ -141,9 +144,10 @@ class RespiroView extends Ui.View {
         startRecording();
         _startedAtMs = Sys.getTimer();
         _lastBacklightAtMs = _startedAtMs;
+        _backlightAvailable = true;
         _lastPhaseIsInhaling = true;
         _isRunning = true;
-        Attention.backlight(true);
+        requestBacklight();
         _frameTimer.start(method(:onFrame), FRAME_INTERVAL_MS, true);
         Ui.requestUpdate();
     }
@@ -178,9 +182,9 @@ class RespiroView extends Ui.View {
 
             var sinceBacklightRefresh = now - _lastBacklightAtMs;
 
-            if (sinceBacklightRefresh < 0
-                    || sinceBacklightRefresh >= BACKLIGHT_REFRESH_MS) {
-                Attention.backlight(true);
+            if (_backlightAvailable && (sinceBacklightRefresh < 0
+                    || sinceBacklightRefresh >= BACKLIGHT_REFRESH_MS)) {
+                requestBacklight();
                 _lastBacklightAtMs = now;
             }
 
@@ -203,12 +207,19 @@ class RespiroView extends Ui.View {
 
     private function drawIdleState(dc) {
         var centerX = dc.getWidth() / 2;
-        var centerY = dc.getHeight() / 2 + 8;
+        var centerY = getCircleCenterY(dc);
+        var readyRadius = scaleToDisplay(dc, READY_RADIUS_REFERENCE);
 
-        drawCenteredText(dc, 30, Gfx.FONT_XTINY, _menuHintText, Gfx.COLOR_LT_GRAY);
+        drawCenteredText(
+            dc,
+            scaleToDisplay(dc, 30),
+            Gfx.FONT_XTINY,
+            _menuHintText,
+            Gfx.COLOR_LT_GRAY
+        );
 
         dc.setColor(_circleColor, Gfx.COLOR_BLACK);
-        dc.fillCircle(centerX, centerY, 48);
+        dc.fillCircle(centerX, centerY, readyRadius);
         drawCenteredText(
             dc,
             centerY,
@@ -219,10 +230,22 @@ class RespiroView extends Ui.View {
 
         var phaseSummary = _inhaleShortText + " " + formatDuration(_inhaleMs)
             + "  " + _exhaleShortText + " " + formatDuration(_exhaleMs);
-        drawCenteredText(dc, 193, Gfx.FONT_XTINY, phaseSummary, Gfx.COLOR_LT_GRAY);
+        drawCenteredText(
+            dc,
+            scaleToDisplay(dc, 193),
+            Gfx.FONT_XTINY,
+            phaseSummary,
+            Gfx.COLOR_LT_GRAY
+        );
 
         var sessionSummary = _sessionText + ": " + formatSessionDuration();
-        drawCenteredText(dc, 214, Gfx.FONT_XTINY, sessionSummary, Gfx.COLOR_DK_GRAY);
+        drawCenteredText(
+            dc,
+            scaleToDisplay(dc, 214),
+            Gfx.FONT_XTINY,
+            sessionSummary,
+            getSessionSummaryColor(dc)
+        );
     }
 
     private function drawBreathingState(dc) {
@@ -252,11 +275,13 @@ class RespiroView extends Ui.View {
 
         var progress = phaseElapsed.toFloat() / phaseDuration.toFloat();
         var radiusProgress = isInhaling ? progress : (1.0 - progress);
-        var radius = MIN_RADIUS
-            + ((MAX_RADIUS - MIN_RADIUS) * radiusProgress).toNumber();
+        var minRadius = scaleToDisplay(dc, MIN_RADIUS_REFERENCE);
+        var maxRadius = scaleToDisplay(dc, MAX_RADIUS_REFERENCE);
+        var radius = minRadius
+            + ((maxRadius - minRadius) * radiusProgress).toNumber();
         var remainingMs = phaseDuration - phaseElapsed;
         var centerX = dc.getWidth() / 2;
-        var centerY = dc.getHeight() / 2 + 8;
+        var centerY = getCircleCenterY(dc);
         var phaseName = isInhaling ? _inhaleText : _exhaleText;
         var elapsedText = formatElapsed(elapsed);
         if (_sessionDurationMs > 0) {
@@ -265,7 +290,13 @@ class RespiroView extends Ui.View {
         var sessionStatus = phaseName + "  " + elapsedText;
         var phaseColor = getPhaseColor(isInhaling);
 
-        drawCenteredText(dc, 28, Gfx.FONT_XTINY, sessionStatus, Gfx.COLOR_WHITE);
+        drawCenteredText(
+            dc,
+            scaleToDisplay(dc, 28),
+            Gfx.FONT_XTINY,
+            sessionStatus,
+            Gfx.COLOR_WHITE
+        );
 
         dc.setColor(phaseColor, Gfx.COLOR_BLACK);
         dc.fillCircle(centerX, centerY, radius);
@@ -288,6 +319,42 @@ class RespiroView extends Ui.View {
             text,
             Gfx.TEXT_JUSTIFY_CENTER | Gfx.TEXT_JUSTIFY_VCENTER
         );
+    }
+
+    private function getCircleCenterY(dc) {
+        return dc.getHeight() / 2 + scaleToDisplay(dc, 8);
+    }
+
+    private function scaleToDisplay(dc, referencePixels) {
+        var minimumDimension = dc.getWidth();
+        if (dc.getHeight() < minimumDimension) {
+            minimumDimension = dc.getHeight();
+        }
+
+        return minimumDimension * referencePixels / REFERENCE_DISPLAY_SIZE;
+    }
+
+    private function getSessionSummaryColor(dc) {
+        // The Forerunner 55 palette has only eight colors, so dark gray can
+        // collapse to the black background. Other supported displays retain
+        // the subtler secondary text color used by the original 240px layout.
+        return dc.getWidth() <= 208 && dc.getHeight() <= 208
+            ? Gfx.COLOR_LT_GRAY
+            : Gfx.COLOR_DK_GRAY;
+    }
+
+    private function requestBacklight() {
+        if (!_backlightAvailable) {
+            return;
+        }
+
+        try {
+            Attention.backlight(true);
+        } catch (exception) {
+            // Some AMOLED devices limit prolonged backlight requests. Continue
+            // the session normally if the platform declines further requests.
+            _backlightAvailable = false;
+        }
     }
 
     private function secondsToMilliseconds(value, fallback) {

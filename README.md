@@ -1,8 +1,8 @@
 # Simple Breath (Respiro) for Garmin
 
-Simple Breath is a Connect IQ watch app that guides slow, paced breathing on a
-Garmin Forerunner 245 or Forerunner 245 Music. The app uses an animated circle:
-it expands while you inhale and contracts while you exhale.
+Simple Breath is a Connect IQ watch app that guides slow, paced breathing on
+compatible Garmin Forerunner watches. The app uses an animated circle: it
+expands while you inhale and contracts while you exhale.
 
 The default rhythm is 5.5 seconds in and 5.5 seconds out. Phase durations,
 session duration, circle color, vibration cues, and sound cues can be changed
@@ -32,8 +32,8 @@ keep count or watch a clock.
   exhalation.
 - Optional short beep at each configured breathing cue, plus a distinct
   completion tone at the end of a timed session.
-- Backlight kept active during a running session at the watch's configured
-  brightness level.
+- Best-effort backlight requests during a running session, respecting platform
+  limits and the watch's configured brightness level.
 - Heart-rate sensor enabled only while the exercise is running.
 - Each completed session saved as a localized FIT activity and synced by Garmin
   Connect.
@@ -125,16 +125,27 @@ available in Garmin's [Activity Recording documentation][activity-recording].
 
 During an active session, the app periodically requests the backlight so the
 display remains easy to read. Brightness still follows the system setting on
-the watch. Keeping the backlight active uses more battery than the normal
-timeout behavior.
+the watch. Some AMOLED devices can limit prolonged backlight requests; the app
+continues the breathing session normally if the platform declines one. Keeping
+the display active uses more battery than the normal timeout behavior.
 
 After the session stops or the app closes, the app stops requesting the
 backlight and normal watch behavior resumes.
 
 ## Supported devices
 
-- Garmin Forerunner 245 (`fr245`)
-- Garmin Forerunner 245 Music (`fr245m`)
+| Family | Models |
+| --- | --- |
+| Forerunner 55 | 55 |
+| Forerunner 245 | 245, 245 Music |
+| Forerunner 255 | 255, 255 Music, 255S, 255S Music |
+| Forerunner 265 | 265, 265S |
+| Forerunner 745 | 745 |
+| Forerunner 945 | 945, 945 LTE |
+
+The interface scales automatically from the 208×208, eight-color Forerunner 55
+display to the 416×416 AMOLED Forerunner 265 display. Device-specific launcher
+icons are included where Garmin requires a different native size.
 
 The minimum declared Connect IQ API version is 3.1.0.
 
@@ -143,7 +154,7 @@ The minimum declared Connect IQ API version is 3.1.0.
 ### Requirements
 
 - [Garmin Connect IQ SDK][connect-iq-sdk]
-- Forerunner 245 and/or Forerunner 245 Music device definitions
+- Device definitions for the watch models you want to build
 - A Connect IQ developer key
 - Optional: Visual Studio Code with Garmin's Monkey C extension
 
@@ -167,8 +178,21 @@ monkeyc \
   -o bin/Respiro-fr245.prg
 ```
 
-For the Music model, replace `fr245` with `fr245m` and use a corresponding
-output filename.
+Replace `fr245` with another product ID from `manifest.xml` to build for a
+different supported model.
+
+To create the signed multi-device package used by the Connect IQ Store:
+
+```sh
+monkeyc \
+  -e \
+  -f monkey.jungle \
+  -y /path/to/developer-key.der \
+  -o bin/SimpleBreath.iq
+```
+
+Keep the developer key safe: the same key is required to publish future
+updates of the app.
 
 Compiler output, PRG packages, debug files, and developer keys are excluded
 from Git by `.gitignore`.
@@ -193,9 +217,11 @@ manifest.xml                  App metadata, devices, and permissions
 monkey.jungle                 Connect IQ build configuration
 source/                       Monkey C application code
 resources/drawables/          Launcher icon
+resources-fr*/drawables/      Device-specific launcher icon sizes
 resources/settings/           Configurable properties and setting definitions
 resources/strings/            Default English strings
 resources-ita/strings/        Italian strings
+store/                        Store listing copy and tested screenshots
 ```
 
 ## License

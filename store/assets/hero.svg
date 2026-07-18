@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1440" height="720" viewBox="0 0 1440 720">
+    <defs>
+        <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0" stop-color="#001B33" />
+            <stop offset="1" stop-color="#0055AA" />
+        </linearGradient>
+    </defs>
+    <rect width="1440" height="720" fill="url(#background)" />
+    <circle cx="370" cy="360" r="210" fill="none" stroke="#FFFFFF" stroke-width="28" />
+    <circle cx="370" cy="360" r="100" fill="#00AAFF" />
+    <circle cx="370" cy="360" r="32" fill="#FFFFFF" />
+    <text x="690" y="330" fill="#FFFFFF" font-family="Helvetica Neue, Arial, sans-serif" font-size="88" font-weight="600">Simple Breath</text>
+    <text x="695" y="410" fill="#BFEAFF" font-family="Helvetica Neue, Arial, sans-serif" font-size="38">Breathe at your rhythm.</text>
+</svg>

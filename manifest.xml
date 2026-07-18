@@ -7,10 +7,20 @@
         minSdkVersion="3.1.0"
         name="@Strings.AppName"
         type="watch-app"
-        version="1.5.1">
+        version="1.6.0">
         <iq:products>
+            <iq:product id="fr55"/>
             <iq:product id="fr245"/>
             <iq:product id="fr245m"/>
+            <iq:product id="fr255"/>
+            <iq:product id="fr255m"/>
+            <iq:product id="fr255s"/>
+            <iq:product id="fr255sm"/>
+            <iq:product id="fr265"/>
+            <iq:product id="fr265s"/>
+            <iq:product id="fr745"/>
+            <iq:product id="fr945"/>
+            <iq:product id="fr945lte"/>
         </iq:products>
         <iq:permissions>
             <iq:uses-permission id="Fit"/>
