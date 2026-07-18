@@ -48,7 +48,7 @@ keep count or watch a clock.
    on the watch.
 2. Review the configured inhale, exhale, and session durations on the ready
    screen.
-3. To change the session duration, hold **UP/MENU**, select `Unlimited`, 5, 10,
+3. To change the session duration, press **DOWN**, select `Unlimited`, 5, 10,
    15, or 20 minutes, and press **START/ENTER** to confirm.
 4. Press the physical **START/ENTER** button to begin.
 5. Follow the circle:
@@ -74,8 +74,8 @@ boundary, and a new cycle starts automatically.
 
 ## Settings
 
-Session duration can be changed directly on the ready screen by holding
-**UP/MENU**. All settings are also defined for Garmin Connect, the Connect IQ
+Session duration can be changed directly on the ready screen by pressing
+**DOWN**. All settings are also defined for Garmin Connect, the Connect IQ
 app, or Garmin Express once the app is distributed through the Connect IQ
 Store. Availability of each external settings interface depends on how the app
 was installed and on the phone or desktop software being used.

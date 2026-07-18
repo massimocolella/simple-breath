@@ -38,5 +38,5 @@
     <string id="SessionShort">SESSIONE</string>
     <string id="SessionUnlimitedShort">LIBERA</string>
     <string id="MinutesShort">MIN</string>
-    <string id="SessionMenuHint">TIENI UP: DURATA</string>
+    <string id="SessionMenuHint">DOWN: DURATA</string>
 </strings>

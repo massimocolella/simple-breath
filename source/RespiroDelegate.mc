@@ -75,6 +75,10 @@ class RespiroDelegate extends Ui.BehaviorDelegate {
         return true;
     }
 
+    function onNextPage() {
+        return onMenu();
+    }
+
     function onBack() {
         _view.stop();
         return false;
