@@ -7,6 +7,12 @@ it expands while you inhale and contracts while you exhale.
 The default rhythm is 5.5 seconds in and 5.5 seconds out. Durations, circle
 color, and vibration cues can be changed from the app settings.
 
+## Inspiration
+
+The idea for this app came while reading James Nestor's book *Breath*. It
+inspired a simple tool for practicing slow, regular breathing without having to
+keep count or watch a clock.
+
 ## Features
 
 - Separate, configurable inhale and exhale durations.
