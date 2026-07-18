@@ -23,6 +23,7 @@ keep count or watch a clock.
 - Current phase (`INHALE` or `EXHALE`) shown at the top of the screen.
 - Remaining phase time shown inside the circle in tenths of a second.
 - Free sessions or automatic completion after 5, 10, 15, or 20 minutes.
+- Session duration selectable directly on the watch and saved for the next run.
 - Session timer shown as `MM:SS`, or `H:MM:SS` after one hour. A timed session
   also shows its target duration.
 - Configurable vibration cues at every phase change, once per complete cycle,
@@ -45,13 +46,16 @@ keep count or watch a clock.
 
 1. Open **Simple Breath** (or **Respiro** in Italian) from the activity/app list
    on the watch.
-2. Review the configured inhale and exhale durations on the ready screen.
-3. Press the physical **START/ENTER** button to begin.
-4. Follow the circle:
+2. Review the configured inhale, exhale, and session durations on the ready
+   screen.
+3. To change the session duration, hold **UP/MENU**, select `Unlimited`, 5, 10,
+   15, or 20 minutes, and press **START/ENTER** to confirm.
+4. Press the physical **START/ENTER** button to begin.
+5. Follow the circle:
    - breathe in while it grows at full brightness;
    - breathe out while it shrinks in a darker shade;
    - follow the configured vibration cues without needing to watch the display.
-5. Press **START/ENTER** again to stop and save the session. A timed session
+6. Press **START/ENTER** again to stop and save the session. A timed session
    stops and saves automatically when it reaches its configured duration.
 
 Pressing **BACK** during a session also stops and saves it before leaving the
@@ -70,9 +74,11 @@ boundary, and a new cycle starts automatically.
 
 ## Settings
 
-Open the app details in Garmin Connect, the Connect IQ app, or Garmin Express,
-then select **Settings**. Availability of each settings interface depends on
-the phone and desktop software being used.
+Session duration can be changed directly on the ready screen by holding
+**UP/MENU**. All settings are also defined for Garmin Connect, the Connect IQ
+app, or Garmin Express once the app is distributed through the Connect IQ
+Store. Availability of each external settings interface depends on how the app
+was installed and on the phone or desktop software being used.
 
 | Setting | Default | Allowed values |
 | --- | ---: | --- |

@@ -40,7 +40,6 @@ class RespiroView extends Ui.View {
     private var _vibrationMode = VIBRATION_EVERY_PHASE;
     private var _soundMode = SOUND_OFF;
     private var _circleColor = Gfx.COLOR_BLUE;
-    private var _appTitleText;
     private var _readyText;
     private var _inhaleText;
     private var _exhaleText;
@@ -50,6 +49,7 @@ class RespiroView extends Ui.View {
     private var _sessionText;
     private var _unlimitedText;
     private var _minutesShortText;
+    private var _menuHintText;
 
     function initialize() {
         View.initialize();
@@ -116,6 +116,20 @@ class RespiroView extends Ui.View {
         } else {
             start();
         }
+    }
+
+    function isRunning() {
+        return _isRunning;
+    }
+
+    function getSessionDurationMinutes() {
+        return _sessionDurationMs / 60000;
+    }
+
+    function setSessionDurationMinutes(minutes) {
+        App.Properties.setValue("SessionDurationMinutes", minutes);
+        reloadSettings();
+        Ui.requestUpdate();
     }
 
     function start() {
@@ -191,7 +205,7 @@ class RespiroView extends Ui.View {
         var centerX = dc.getWidth() / 2;
         var centerY = dc.getHeight() / 2 + 8;
 
-        drawCenteredText(dc, 30, Gfx.FONT_XTINY, _appTitleText, Gfx.COLOR_LT_GRAY);
+        drawCenteredText(dc, 30, Gfx.FONT_XTINY, _menuHintText, Gfx.COLOR_LT_GRAY);
 
         dc.setColor(_circleColor, Gfx.COLOR_BLACK);
         dc.fillCircle(centerX, centerY, 48);
@@ -330,7 +344,6 @@ class RespiroView extends Ui.View {
     }
 
     private function loadLocalizedText() {
-        _appTitleText = Ui.loadResource(Rez.Strings.AppTitle);
         _readyText = Ui.loadResource(Rez.Strings.Ready);
         _inhaleText = Ui.loadResource(Rez.Strings.Inhale);
         _exhaleText = Ui.loadResource(Rez.Strings.Exhale);
@@ -340,6 +353,7 @@ class RespiroView extends Ui.View {
         _sessionText = Ui.loadResource(Rez.Strings.SessionShort);
         _unlimitedText = Ui.loadResource(Rez.Strings.SessionUnlimitedShort);
         _minutesShortText = Ui.loadResource(Rez.Strings.MinutesShort);
+        _menuHintText = Ui.loadResource(Rez.Strings.SessionMenuHint);
     }
 
     private function updatePhaseCues(elapsed) {
