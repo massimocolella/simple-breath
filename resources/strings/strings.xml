@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<strings>
+    <string id="AppName">Respiro</string>
+    <string id="InhaleSecondsTitle">Durata inspirazione (secondi)</string>
+    <string id="ExhaleSecondsTitle">Durata espirazione (secondi)</string>
+    <string id="DurationPrompt">Inserisci un valore da 1 a 30 secondi</string>
+    <string id="DurationError">La durata deve essere compresa tra 1 e 30 secondi</string>
+    <string id="CircleColorTitle">Colore del cerchio</string>
+    <string id="ColorBlue">Azzurro</string>
+    <string id="ColorGreen">Verde</string>
+    <string id="ColorYellow">Giallo</string>
+    <string id="ColorOrange">Arancione</string>
+    <string id="ColorRed">Rosso</string>
+    <string id="ColorPurple">Viola</string>
+    <string id="ColorPink">Rosa</string>
+    <string id="ColorWhite">Bianco</string>
+</strings>

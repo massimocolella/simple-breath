@@ -1,0 +1,15 @@
+# Output del compilatore Connect IQ
+bin/
+*.prg
+*.iq
+*.debug.xml
+
+# Chiavi sviluppatore: non devono mai essere pubblicate
+*.der
+*.key
+*.pem
+
+# File locali di macOS e degli editor
+.DS_Store
+.vscode/
+.idea/
