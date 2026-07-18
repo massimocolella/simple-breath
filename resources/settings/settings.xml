@@ -44,4 +44,24 @@
             <listEntry value="2">@Strings.VibrationEveryPhase</listEntry>
         </settingConfig>
     </setting>
+
+    <setting propertyKey="@Properties.SoundMode" title="@Strings.SoundModeTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SoundOff</listEntry>
+            <listEntry value="1">@Strings.SoundEveryCycle</listEntry>
+            <listEntry value="2">@Strings.SoundEveryPhase</listEntry>
+        </settingConfig>
+    </setting>
+
+    <setting
+        propertyKey="@Properties.SessionDurationMinutes"
+        title="@Strings.SessionDurationTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.SessionUnlimited</listEntry>
+            <listEntry value="5">@Strings.Session5Minutes</listEntry>
+            <listEntry value="10">@Strings.Session10Minutes</listEntry>
+            <listEntry value="15">@Strings.Session15Minutes</listEntry>
+            <listEntry value="20">@Strings.Session20Minutes</listEntry>
+        </settingConfig>
+    </setting>
 </settings>

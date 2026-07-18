@@ -17,7 +17,13 @@ class RespiroView extends Ui.View {
     private const VIBRATION_EVERY_CYCLE = 1;
     private const VIBRATION_EVERY_PHASE = 2;
     private const VIBRATION_STRENGTH = 60;
-    private const VIBRATION_DURATION_MS = 160;
+    private const VIBRATION_INHALE_MS = 160;
+    private const VIBRATION_EXHALE_MS = 100;
+    private const VIBRATION_PAUSE_MS = 90;
+    private const VIBRATION_COMPLETE_MS = 500;
+    private const SOUND_OFF = 0;
+    private const SOUND_EVERY_CYCLE = 1;
+    private const SOUND_EVERY_PHASE = 2;
     private const MIN_RADIUS = 24;
     private const MAX_RADIUS = 82;
 
@@ -30,7 +36,9 @@ class RespiroView extends Ui.View {
     private var _lastBacklightAtMs = 0;
     private var _inhaleMs = DEFAULT_PHASE_MS;
     private var _exhaleMs = DEFAULT_PHASE_MS;
+    private var _sessionDurationMs = 0;
     private var _vibrationMode = VIBRATION_EVERY_PHASE;
+    private var _soundMode = SOUND_OFF;
     private var _circleColor = Gfx.COLOR_BLUE;
     private var _appTitleText;
     private var _readyText;
@@ -39,6 +47,9 @@ class RespiroView extends Ui.View {
     private var _inhaleShortText;
     private var _exhaleShortText;
     private var _activityNameText;
+    private var _sessionText;
+    private var _unlimitedText;
+    private var _minutesShortText;
 
     function initialize() {
         View.initialize();
@@ -81,6 +92,16 @@ class RespiroView extends Ui.View {
         if (configuredVibration != null) {
             _vibrationMode = configuredVibration;
         }
+
+        var configuredSound = App.Properties.getValue("SoundMode");
+        if (configuredSound != null) {
+            _soundMode = configuredSound;
+        }
+
+        var configuredSessionDuration = App.Properties.getValue(
+            "SessionDurationMinutes"
+        );
+        _sessionDurationMs = minutesToMilliseconds(configuredSessionDuration);
 
         // Una modifica delle durate fa ripartire il ritmo dall'inspirazione.
         if (_isRunning) {
@@ -127,6 +148,20 @@ class RespiroView extends Ui.View {
     function onFrame() {
         if (_isRunning) {
             var now = Sys.getTimer();
+            var elapsed = now - _startedAtMs;
+
+            if (elapsed < 0) {
+                _startedAtMs = now;
+                _lastPhaseIsInhaling = true;
+                elapsed = 0;
+            }
+
+            if (_sessionDurationMs > 0 && elapsed >= _sessionDurationMs) {
+                playCompletionCues();
+                stop();
+                return;
+            }
+
             var sinceBacklightRefresh = now - _lastBacklightAtMs;
 
             if (sinceBacklightRefresh < 0
@@ -135,7 +170,7 @@ class RespiroView extends Ui.View {
                 _lastBacklightAtMs = now;
             }
 
-            updatePhaseVibration(now);
+            updatePhaseCues(elapsed);
         }
 
         Ui.requestUpdate();
@@ -171,6 +206,9 @@ class RespiroView extends Ui.View {
         var phaseSummary = _inhaleShortText + " " + formatDuration(_inhaleMs)
             + "  " + _exhaleShortText + " " + formatDuration(_exhaleMs);
         drawCenteredText(dc, 193, Gfx.FONT_XTINY, phaseSummary, Gfx.COLOR_LT_GRAY);
+
+        var sessionSummary = _sessionText + ": " + formatSessionDuration();
+        drawCenteredText(dc, 214, Gfx.FONT_XTINY, sessionSummary, Gfx.COLOR_DK_GRAY);
     }
 
     private function drawBreathingState(dc) {
@@ -206,7 +244,11 @@ class RespiroView extends Ui.View {
         var centerX = dc.getWidth() / 2;
         var centerY = dc.getHeight() / 2 + 8;
         var phaseName = isInhaling ? _inhaleText : _exhaleText;
-        var sessionStatus = phaseName + "  " + formatElapsed(elapsed);
+        var elapsedText = formatElapsed(elapsed);
+        if (_sessionDurationMs > 0) {
+            elapsedText += "/" + formatElapsed(_sessionDurationMs);
+        }
+        var sessionStatus = phaseName + "  " + elapsedText;
         var phaseColor = getPhaseColor(isInhaling);
 
         drawCenteredText(dc, 28, Gfx.FONT_XTINY, sessionStatus, Gfx.COLOR_WHITE);
@@ -243,6 +285,14 @@ class RespiroView extends Ui.View {
         return milliseconds > 0 ? milliseconds : fallback;
     }
 
+    private function minutesToMilliseconds(value) {
+        if (value == null || value <= 0) {
+            return 0;
+        }
+
+        return (value * 60 * 1000).toNumber();
+    }
+
     private function formatDuration(milliseconds) {
         var tenths = (milliseconds + 50) / 100;
         return (tenths / 10).toString() + "," + (tenths % 10).toString() + "s";
@@ -267,6 +317,14 @@ class RespiroView extends Ui.View {
         return padTwo(totalSeconds / 60) + ":" + padTwo(seconds);
     }
 
+    private function formatSessionDuration() {
+        if (_sessionDurationMs <= 0) {
+            return _unlimitedText;
+        }
+
+        return (_sessionDurationMs / 60000).toString() + " " + _minutesShortText;
+    }
+
     private function padTwo(value) {
         return value < 10 ? "0" + value.toString() : value.toString();
     }
@@ -279,17 +337,12 @@ class RespiroView extends Ui.View {
         _inhaleShortText = Ui.loadResource(Rez.Strings.InhaleShort);
         _exhaleShortText = Ui.loadResource(Rez.Strings.ExhaleShort);
         _activityNameText = Ui.loadResource(Rez.Strings.ActivityName);
+        _sessionText = Ui.loadResource(Rez.Strings.SessionShort);
+        _unlimitedText = Ui.loadResource(Rez.Strings.SessionUnlimitedShort);
+        _minutesShortText = Ui.loadResource(Rez.Strings.MinutesShort);
     }
 
-    private function updatePhaseVibration(now) {
-        var elapsed = now - _startedAtMs;
-
-        if (elapsed < 0) {
-            _startedAtMs = now;
-            _lastPhaseIsInhaling = true;
-            return;
-        }
-
+    private function updatePhaseCues(elapsed) {
         var cycleElapsed = elapsed % (_inhaleMs + _exhaleMs);
         var isInhaling = cycleElapsed < _inhaleMs;
 
@@ -300,15 +353,61 @@ class RespiroView extends Ui.View {
         if (_vibrationMode != VIBRATION_OFF
                 && (_vibrationMode == VIBRATION_EVERY_PHASE
                 || (_vibrationMode == VIBRATION_EVERY_CYCLE && isInhaling))) {
+            playPhaseVibration(isInhaling);
+        }
+
+        if (_soundMode != SOUND_OFF
+                && (_soundMode == SOUND_EVERY_PHASE
+                || (_soundMode == SOUND_EVERY_CYCLE && isInhaling))) {
+            playPhaseTone();
+        }
+
+        _lastPhaseIsInhaling = isInhaling;
+    }
+
+    private function playPhaseVibration(isInhaling) {
+        if (isInhaling) {
             Attention.vibrate([
                 new Attention.VibeProfile(
                     VIBRATION_STRENGTH,
-                    VIBRATION_DURATION_MS
+                    VIBRATION_INHALE_MS
+                )
+            ]);
+            return;
+        }
+
+        Attention.vibrate([
+            new Attention.VibeProfile(
+                VIBRATION_STRENGTH,
+                VIBRATION_EXHALE_MS
+            ),
+            new Attention.VibeProfile(0, VIBRATION_PAUSE_MS),
+            new Attention.VibeProfile(
+                VIBRATION_STRENGTH,
+                VIBRATION_EXHALE_MS
+            )
+        ]);
+    }
+
+    private function playPhaseTone() {
+        if (Attention has :playTone) {
+            Attention.playTone(Attention.TONE_KEY);
+        }
+    }
+
+    private function playCompletionCues() {
+        if (_vibrationMode != VIBRATION_OFF) {
+            Attention.vibrate([
+                new Attention.VibeProfile(
+                    VIBRATION_STRENGTH,
+                    VIBRATION_COMPLETE_MS
                 )
             ]);
         }
 
-        _lastPhaseIsInhaling = isInhaling;
+        if (_soundMode != SOUND_OFF && Attention has :playTone) {
+            Attention.playTone(Attention.TONE_SUCCESS);
+        }
     }
 
     private function getPhaseColor(isInhaling) {

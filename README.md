@@ -4,8 +4,9 @@ Simple Breath is a Connect IQ watch app that guides slow, paced breathing on a
 Garmin Forerunner 245 or Forerunner 245 Music. The app uses an animated circle:
 it expands while you inhale and contracts while you exhale.
 
-The default rhythm is 5.5 seconds in and 5.5 seconds out. Durations, circle
-color, and vibration cues can be changed from the app settings.
+The default rhythm is 5.5 seconds in and 5.5 seconds out. Phase durations,
+session duration, circle color, vibration cues, and sound cues can be changed
+from the app settings.
 
 ## Inspiration
 
@@ -21,9 +22,15 @@ keep count or watch a clock.
   while exhaling.
 - Current phase (`INHALE` or `EXHALE`) shown at the top of the screen.
 - Remaining phase time shown inside the circle in tenths of a second.
-- Session timer shown as `MM:SS`, or `H:MM:SS` after one hour.
+- Free sessions or automatic completion after 5, 10, 15, or 20 minutes.
+- Session timer shown as `MM:SS`, or `H:MM:SS` after one hour. A timed session
+  also shows its target duration.
 - Configurable vibration cues at every phase change, once per complete cycle,
   or disabled.
+- Distinct vibration patterns: one pulse for inhalation and two pulses for
+  exhalation.
+- Optional short beep at each configured breathing cue, plus a distinct
+  completion tone at the end of a timed session.
 - Backlight kept active during a running session at the watch's configured
   brightness level.
 - Heart-rate sensor enabled only while the exercise is running.
@@ -44,7 +51,8 @@ keep count or watch a clock.
    - breathe in while it grows at full brightness;
    - breathe out while it shrinks in a darker shade;
    - follow the configured vibration cues without needing to watch the display.
-5. Press **START/ENTER** again to stop and save the session.
+5. Press **START/ENTER** again to stop and save the session. A timed session
+   stops and saves automatically when it reaches its configured duration.
 
 Pressing **BACK** during a session also stops and saves it before leaving the
 app.
@@ -52,8 +60,9 @@ app.
 ## Screen information
 
 While a session is running, the top line contains the current breathing phase
-and total elapsed exercise time. The number inside the circle is the time left
-in the current inhale or exhale phase.
+and total elapsed exercise time. Timed sessions show elapsed and target time as
+`MM:SS/MM:SS`. The number inside the circle is the time left in the current
+inhale or exhale phase.
 
 The circle reaches its maximum size at the end of inhalation and its minimum
 size at the end of exhalation. Its brightness changes immediately at each phase
@@ -69,19 +78,24 @@ the phone and desktop software being used.
 | --- | ---: | --- |
 | Inhale duration | 5.5 seconds | 1–30 seconds |
 | Exhale duration | 5.5 seconds | 1–30 seconds |
+| Session duration | Unlimited | Unlimited, 5, 10, 15, or 20 minutes |
 | Circle color | Light blue | Light blue, green, yellow, orange, red, purple, pink, or white |
 | Vibration | Every phase | Off, every cycle, or every phase |
+| Sound cues | Off | Off, every cycle, or every phase |
 
 Decimal values are supported. The decimal separator may follow the phone's
 locale, so the default can appear as either `5.5` or `5,5`.
 
-The vibration modes behave as follows:
+The vibration and sound modes behave as follows:
 
-- **Off**: no vibration cues.
-- **Every cycle**: one vibration when exhalation ends and the next inhalation
-  begins.
-- **Every phase**: one vibration at both inhale-to-exhale and
-  exhale-to-inhale transitions.
+- **Off**: no cues of that type.
+- **Every cycle**: a cue when exhalation ends and the next inhalation begins.
+- **Every phase**: cues at both inhale-to-exhale and exhale-to-inhale
+  transitions.
+
+Vibration uses one pulse for inhalation and two pulses for exhalation. Sound
+uses the same short beep at each configured transition. When a timed session
+completes, each enabled cue type also provides a distinct completion signal.
 
 The app currently includes English and Italian translations. English is used as
 the fallback for other system languages.

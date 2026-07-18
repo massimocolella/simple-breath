@@ -25,4 +25,17 @@
     <string id="VibrationOff">Spenta</string>
     <string id="VibrationEveryCycle">Ogni ciclo</string>
     <string id="VibrationEveryPhase">Ogni fase</string>
+    <string id="SoundModeTitle">Segnali sonori</string>
+    <string id="SoundOff">Spenti</string>
+    <string id="SoundEveryCycle">Ogni ciclo</string>
+    <string id="SoundEveryPhase">Ogni fase</string>
+    <string id="SessionDurationTitle">Durata sessione</string>
+    <string id="SessionUnlimited">Libera</string>
+    <string id="Session5Minutes">5 minuti</string>
+    <string id="Session10Minutes">10 minuti</string>
+    <string id="Session15Minutes">15 minuti</string>
+    <string id="Session20Minutes">20 minuti</string>
+    <string id="SessionShort">SESSIONE</string>
+    <string id="SessionUnlimitedShort">LIBERA</string>
+    <string id="MinutesShort">MIN</string>
 </strings>
