@@ -1,17 +1,28 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <strings>
-    <string id="AppName">Respiro</string>
-    <string id="InhaleSecondsTitle">Durata inspirazione (secondi)</string>
-    <string id="ExhaleSecondsTitle">Durata espirazione (secondi)</string>
-    <string id="DurationPrompt">Inserisci un valore da 1 a 30 secondi</string>
-    <string id="DurationError">La durata deve essere compresa tra 1 e 30 secondi</string>
-    <string id="CircleColorTitle">Colore del cerchio</string>
-    <string id="ColorBlue">Azzurro</string>
-    <string id="ColorGreen">Verde</string>
-    <string id="ColorYellow">Giallo</string>
-    <string id="ColorOrange">Arancione</string>
-    <string id="ColorRed">Rosso</string>
-    <string id="ColorPurple">Viola</string>
-    <string id="ColorPink">Rosa</string>
-    <string id="ColorWhite">Bianco</string>
+    <string id="AppName">Simple Breath</string>
+    <string id="ActivityName">Breathing</string>
+    <string id="AppTitle">BREATHE</string>
+    <string id="Ready">READY</string>
+    <string id="Inhale">INHALE</string>
+    <string id="Exhale">EXHALE</string>
+    <string id="InhaleShort">IN</string>
+    <string id="ExhaleShort">OUT</string>
+    <string id="InhaleSecondsTitle">Inhale duration (seconds)</string>
+    <string id="ExhaleSecondsTitle">Exhale duration (seconds)</string>
+    <string id="DurationPrompt">Enter a value from 1 to 30 seconds</string>
+    <string id="DurationError">Duration must be between 1 and 30 seconds</string>
+    <string id="CircleColorTitle">Circle color</string>
+    <string id="ColorBlue">Light blue</string>
+    <string id="ColorGreen">Green</string>
+    <string id="ColorYellow">Yellow</string>
+    <string id="ColorOrange">Orange</string>
+    <string id="ColorRed">Red</string>
+    <string id="ColorPurple">Purple</string>
+    <string id="ColorPink">Pink</string>
+    <string id="ColorWhite">White</string>
+    <string id="VibrationModeTitle">Vibration</string>
+    <string id="VibrationOff">Off</string>
+    <string id="VibrationEveryCycle">Every cycle</string>
+    <string id="VibrationEveryPhase">Every phase</string>
 </strings>

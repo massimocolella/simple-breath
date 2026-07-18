@@ -3,4 +3,5 @@
     <property id="InhaleSeconds" type="float">5.5</property>
     <property id="ExhaleSeconds" type="float">5.5</property>
     <property id="CircleColor" type="number">0x00AAFF</property>
+    <property id="VibrationMode" type="number">2</property>
 </properties>

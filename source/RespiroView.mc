@@ -12,6 +12,12 @@ class RespiroView extends Ui.View {
     private const FRAME_INTERVAL_MS = 100;
     private const BACKLIGHT_REFRESH_MS = 5000;
     private const DEFAULT_PHASE_MS = 5500;
+    private const EXHALE_BRIGHTNESS_PERCENT = 55;
+    private const VIBRATION_OFF = 0;
+    private const VIBRATION_EVERY_CYCLE = 1;
+    private const VIBRATION_EVERY_PHASE = 2;
+    private const VIBRATION_STRENGTH = 60;
+    private const VIBRATION_DURATION_MS = 160;
     private const MIN_RADIUS = 24;
     private const MAX_RADIUS = 82;
 
@@ -19,19 +25,30 @@ class RespiroView extends Ui.View {
     private var _recordingSession;
     private var _recordingStarted = false;
     private var _isRunning = false;
+    private var _lastPhaseIsInhaling = true;
     private var _startedAtMs = 0;
     private var _lastBacklightAtMs = 0;
     private var _inhaleMs = DEFAULT_PHASE_MS;
     private var _exhaleMs = DEFAULT_PHASE_MS;
+    private var _vibrationMode = VIBRATION_EVERY_PHASE;
     private var _circleColor = Gfx.COLOR_BLUE;
+    private var _appTitleText;
+    private var _readyText;
+    private var _inhaleText;
+    private var _exhaleText;
+    private var _inhaleShortText;
+    private var _exhaleShortText;
+    private var _activityNameText;
 
     function initialize() {
         View.initialize();
         _frameTimer = new Timer.Timer();
+        loadLocalizedText();
         reloadSettings();
     }
 
     function onShow() {
+        loadLocalizedText();
         reloadSettings();
     }
 
@@ -60,9 +77,15 @@ class RespiroView extends Ui.View {
             _circleColor = configuredColor;
         }
 
+        var configuredVibration = App.Properties.getValue("VibrationMode");
+        if (configuredVibration != null) {
+            _vibrationMode = configuredVibration;
+        }
+
         // Una modifica delle durate fa ripartire il ritmo dall'inspirazione.
         if (_isRunning) {
             _startedAtMs = Sys.getTimer();
+            _lastPhaseIsInhaling = true;
         }
     }
 
@@ -83,6 +106,7 @@ class RespiroView extends Ui.View {
         startRecording();
         _startedAtMs = Sys.getTimer();
         _lastBacklightAtMs = _startedAtMs;
+        _lastPhaseIsInhaling = true;
         _isRunning = true;
         Attention.backlight(true);
         _frameTimer.start(method(:onFrame), FRAME_INTERVAL_MS, true);
@@ -110,6 +134,8 @@ class RespiroView extends Ui.View {
                 Attention.backlight(true);
                 _lastBacklightAtMs = now;
             }
+
+            updatePhaseVibration(now);
         }
 
         Ui.requestUpdate();
@@ -130,7 +156,7 @@ class RespiroView extends Ui.View {
         var centerX = dc.getWidth() / 2;
         var centerY = dc.getHeight() / 2 + 8;
 
-        drawCenteredText(dc, 30, Gfx.FONT_XTINY, "RESPIRO", Gfx.COLOR_LT_GRAY);
+        drawCenteredText(dc, 30, Gfx.FONT_XTINY, _appTitleText, Gfx.COLOR_LT_GRAY);
 
         dc.setColor(_circleColor, Gfx.COLOR_BLACK);
         dc.fillCircle(centerX, centerY, 48);
@@ -138,12 +164,12 @@ class RespiroView extends Ui.View {
             dc,
             centerY,
             Gfx.FONT_SMALL,
-            "PRONTO",
+            _readyText,
             getContrastColor(_circleColor)
         );
 
-        var phaseSummary = "IN " + formatDuration(_inhaleMs)
-            + "  OUT " + formatDuration(_exhaleMs);
+        var phaseSummary = _inhaleShortText + " " + formatDuration(_inhaleMs)
+            + "  " + _exhaleShortText + " " + formatDuration(_exhaleMs);
         drawCenteredText(dc, 193, Gfx.FONT_XTINY, phaseSummary, Gfx.COLOR_LT_GRAY);
     }
 
@@ -179,19 +205,20 @@ class RespiroView extends Ui.View {
         var remainingMs = phaseDuration - phaseElapsed;
         var centerX = dc.getWidth() / 2;
         var centerY = dc.getHeight() / 2 + 8;
-        var phaseName = isInhaling ? "INSPIRA" : "ESPIRA";
+        var phaseName = isInhaling ? _inhaleText : _exhaleText;
         var sessionStatus = phaseName + "  " + formatElapsed(elapsed);
+        var phaseColor = getPhaseColor(isInhaling);
 
         drawCenteredText(dc, 28, Gfx.FONT_XTINY, sessionStatus, Gfx.COLOR_WHITE);
 
-        dc.setColor(_circleColor, Gfx.COLOR_BLACK);
+        dc.setColor(phaseColor, Gfx.COLOR_BLACK);
         dc.fillCircle(centerX, centerY, radius);
         drawCenteredText(
             dc,
             centerY,
             Gfx.FONT_SMALL,
             formatRemaining(remainingMs),
-            getContrastColor(_circleColor)
+            getContrastColor(phaseColor)
         );
 
     }
@@ -244,10 +271,64 @@ class RespiroView extends Ui.View {
         return value < 10 ? "0" + value.toString() : value.toString();
     }
 
+    private function loadLocalizedText() {
+        _appTitleText = Ui.loadResource(Rez.Strings.AppTitle);
+        _readyText = Ui.loadResource(Rez.Strings.Ready);
+        _inhaleText = Ui.loadResource(Rez.Strings.Inhale);
+        _exhaleText = Ui.loadResource(Rez.Strings.Exhale);
+        _inhaleShortText = Ui.loadResource(Rez.Strings.InhaleShort);
+        _exhaleShortText = Ui.loadResource(Rez.Strings.ExhaleShort);
+        _activityNameText = Ui.loadResource(Rez.Strings.ActivityName);
+    }
+
+    private function updatePhaseVibration(now) {
+        var elapsed = now - _startedAtMs;
+
+        if (elapsed < 0) {
+            _startedAtMs = now;
+            _lastPhaseIsInhaling = true;
+            return;
+        }
+
+        var cycleElapsed = elapsed % (_inhaleMs + _exhaleMs);
+        var isInhaling = cycleElapsed < _inhaleMs;
+
+        if (isInhaling == _lastPhaseIsInhaling) {
+            return;
+        }
+
+        if (_vibrationMode != VIBRATION_OFF
+                && (_vibrationMode == VIBRATION_EVERY_PHASE
+                || (_vibrationMode == VIBRATION_EVERY_CYCLE && isInhaling))) {
+            Attention.vibrate([
+                new Attention.VibeProfile(
+                    VIBRATION_STRENGTH,
+                    VIBRATION_DURATION_MS
+                )
+            ]);
+        }
+
+        _lastPhaseIsInhaling = isInhaling;
+    }
+
+    private function getPhaseColor(isInhaling) {
+        if (isInhaling) {
+            return _circleColor;
+        }
+
+        var red = ((_circleColor >> 16) & 0xff)
+            * EXHALE_BRIGHTNESS_PERCENT / 100;
+        var green = ((_circleColor >> 8) & 0xff)
+            * EXHALE_BRIGHTNESS_PERCENT / 100;
+        var blue = (_circleColor & 0xff)
+            * EXHALE_BRIGHTNESS_PERCENT / 100;
+        return (red << 16) | (green << 8) | blue;
+    }
+
     private function startRecording() {
         Sensor.setEnabledSensors([Sensor.SENSOR_HEARTRATE]);
         _recordingSession = ActivityRecording.createSession({
-            :name => "Respiro",
+            :name => _activityNameText,
             :sport => Activity.SPORT_GENERIC,
             :subSport => Activity.SUB_SPORT_GENERIC
         });

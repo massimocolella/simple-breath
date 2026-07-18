@@ -4,33 +4,40 @@ Simple Breath is a Connect IQ watch app that guides slow, paced breathing on a
 Garmin Forerunner 245 or Forerunner 245 Music. The app uses an animated circle:
 it expands while you inhale and contracts while you exhale.
 
-The default rhythm is 5.5 seconds in and 5.5 seconds out. Both durations and
-the circle color can be changed from the app settings.
+The default rhythm is 5.5 seconds in and 5.5 seconds out. Durations, circle
+color, and vibration cues can be changed from the app settings.
 
 ## Features
 
 - Separate, configurable inhale and exhale durations.
 - Smooth circle animation updated every 100 milliseconds.
-- Current phase (`INSPIRA` or `ESPIRA`) shown at the top of the screen.
+- Full-brightness circle while inhaling and the same color at 55% brightness
+  while exhaling.
+- Current phase (`INHALE` or `EXHALE`) shown at the top of the screen.
 - Remaining phase time shown inside the circle in tenths of a second.
 - Session timer shown as `MM:SS`, or `H:MM:SS` after one hour.
+- Configurable vibration cues at every phase change, once per complete cycle,
+  or disabled.
 - Backlight kept active during a running session at the watch's configured
   brightness level.
 - Heart-rate sensor enabled only while the exercise is running.
-- Each completed session saved as a FIT activity named `Respiro` and synced by
-  Garmin Connect.
+- Each completed session saved as a localized FIT activity and synced by Garmin
+  Connect.
 - Automatic save when leaving the app during an active session.
+- English and Italian interface selected automatically from the watch language.
 - High-contrast countdown text selected automatically for the chosen circle
   color.
 
 ## Using the app
 
-1. Open **Respiro** from the activity/app list on the watch.
+1. Open **Simple Breath** (or **Respiro** in Italian) from the activity/app list
+   on the watch.
 2. Review the configured inhale and exhale durations on the ready screen.
 3. Press the physical **START/ENTER** button to begin.
 4. Follow the circle:
-   - breathe in while it grows;
-   - breathe out while it shrinks.
+   - breathe in while it grows at full brightness;
+   - breathe out while it shrinks in a darker shade;
+   - follow the configured vibration cues without needing to watch the display.
 5. Press **START/ENTER** again to stop and save the session.
 
 Pressing **BACK** during a session also stops and saves it before leaving the
@@ -43,7 +50,8 @@ and total elapsed exercise time. The number inside the circle is the time left
 in the current inhale or exhale phase.
 
 The circle reaches its maximum size at the end of inhalation and its minimum
-size at the end of exhalation. A new cycle then starts automatically.
+size at the end of exhalation. Its brightness changes immediately at each phase
+boundary, and a new cycle starts automatically.
 
 ## Settings
 
@@ -56,18 +64,28 @@ the phone and desktop software being used.
 | Inhale duration | 5.5 seconds | 1–30 seconds |
 | Exhale duration | 5.5 seconds | 1–30 seconds |
 | Circle color | Light blue | Light blue, green, yellow, orange, red, purple, pink, or white |
+| Vibration | Every phase | Off, every cycle, or every phase |
 
 Decimal values are supported. The decimal separator may follow the phone's
 locale, so the default can appear as either `5.5` or `5,5`.
 
-The current on-watch interface and settings labels are in Italian.
+The vibration modes behave as follows:
+
+- **Off**: no vibration cues.
+- **Every cycle**: one vibration when exhalation ends and the next inhalation
+  begins.
+- **Every phase**: one vibration at both inhale-to-exhale and
+  exhale-to-inhale transitions.
+
+The app currently includes English and Italian translations. English is used as
+the fallback for other system languages.
 
 ## Garmin Connect activity recording
 
 Starting the breathing exercise also starts a generic FIT recording. Stopping
-the exercise saves the recording under the name `Respiro`. After the next watch
-sync, Garmin Connect should show it as a generic or **Other** activity with its
-duration and heart-rate data when available.
+the exercise saves the recording under the localized name `Breathing` or
+`Respiro`. After the next watch sync, Garmin Connect should show it as a generic
+or **Other** activity with its duration and heart-rate data when available.
 
 The app requests only these Connect IQ permissions:
 
@@ -150,7 +168,8 @@ monkey.jungle                 Connect IQ build configuration
 source/                       Monkey C application code
 resources/drawables/          Launcher icon
 resources/settings/           Configurable properties and setting definitions
-resources/strings/            Interface and settings strings
+resources/strings/            Default English strings
+resources-ita/strings/        Italian strings
 ```
 
 ## License

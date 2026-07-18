@@ -36,4 +36,12 @@
             <listEntry value="0xFFFFFF">@Strings.ColorWhite</listEntry>
         </settingConfig>
     </setting>
+
+    <setting propertyKey="@Properties.VibrationMode" title="@Strings.VibrationModeTitle">
+        <settingConfig type="list">
+            <listEntry value="0">@Strings.VibrationOff</listEntry>
+            <listEntry value="1">@Strings.VibrationEveryCycle</listEntry>
+            <listEntry value="2">@Strings.VibrationEveryPhase</listEntry>
+        </settingConfig>
+    </setting>
 </settings>
